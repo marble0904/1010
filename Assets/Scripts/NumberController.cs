@@ -111,6 +111,28 @@ public class NumberController : MonoBehaviour {
                     ec.ZeroEffect(num, i);
                 }
 
+                if ((i == 0 || i == 2)&& intValues[num, i] == 1)//c0が1のとき
+                {
+                    if (BitCheck(num))
+                    {
+                        Debug.Log("BitMode");
+                    }
+                    else
+                    {
+                        Debug.Log("NotBitMode");
+                    }
+                }else if ((i == 1 || i ==3) && intValues[num, i] == 0)
+                {
+                    if (BitCheck(num))
+                    {
+                        Debug.Log("BitMode");
+                    }
+                    else
+                    {
+                        Debug.Log("NotBitMode");
+                    }
+                }
+
                 numberText[num, i].text = intValues[num, i].ToString();//テキストを更新
 
             }
@@ -127,10 +149,47 @@ public class NumberController : MonoBehaviour {
                     ec.ZeroEffect(i,num);
                 }
 
+                if((num == 0 || num == 2)&& intValues[i,num] == 1)//c0が1のとき
+                {
+                    if (BitCheck(i))
+                    {
+                        Debug.Log("BitMode");
+                    }
+                    else
+                    {
+                        Debug.Log("NotBitMode");
+                    }
+                }else if ((num == 1 || num ==3) && intValues[i,num] == 0)
+                {
+                    if (BitCheck(i))
+                    {
+                        Debug.Log("BitMode");
+                    }
+                    else
+                    {
+                        Debug.Log("NotBitMode");
+                    }
+                }
+
                 numberText[i, num].text = intValues[i,num].ToString();//テキストを更新
 
             }
         }
 
+    }
+
+    bool BitCheck(int r)
+    {
+        if (intValues[r,1] == 0)
+        {
+            if(intValues[r,2] == 1)
+            {
+                if(intValues[r,3] == 0)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
