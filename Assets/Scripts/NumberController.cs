@@ -109,6 +109,9 @@ public class NumberController : MonoBehaviour {
                 {
                     sc.AddScore(100);
                     ec.ZeroEffect(num, i);
+                    //ゼロの連鎖
+                    Chain(num, i,true);
+                    ec.ZeroChain(i, false);
                 }
 
                 if ((i == 0 || i == 2)&& intValues[num, i] == 1)//c0が1のとき
@@ -147,6 +150,8 @@ public class NumberController : MonoBehaviour {
                 {
                     sc.AddScore(100);
                     ec.ZeroEffect(i,num);
+                    Chain(i, num, false);
+                    ec.ZeroChain(i,true);
                 }
 
                 if((num == 0 || num == 2)&& intValues[i,num] == 1)//c0が1のとき
@@ -191,5 +196,41 @@ public class NumberController : MonoBehaviour {
             }
         }
         return false;
+    }
+
+    void Chain(int r,int c,bool row)//列で連鎖
+    {
+        if (row) {
+            for (int i = 0; i < 4; i++)
+            {
+                if (i != r)
+                {
+                    intValues[i, c] = (intValues[i, c] + 1) % 10;
+                    if (intValues[i, c] == 0)
+                    {
+                        ec.ZeroEffect(i, c);
+                        sc.AddScore(100);
+                    }
+                }
+            }
+
+
+        }
+        else
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                if (i != c)
+                {
+                    intValues[r, i] = (intValues[r, i] + 1) % 10;
+                    if (intValues[r, i] == 0)
+                    {
+                        ec.ZeroEffect(r, i);
+                        sc.AddScore(100);
+                    }
+                }
+            }
+        }
+
     }
 }
