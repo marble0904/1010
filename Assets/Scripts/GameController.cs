@@ -1,21 +1,39 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour {
-    public float span = 0.5f;
+    public float span = 2f;
     float delta = 0;
     bool wait = true;
     public NumberController nc;
     public EffectController ec;
 
+    public float time;
+    public Text timeText;
+    bool bitMode;
+
 	// Use this for initialization
 	void Start () {
-		
+        time = 60f;
 	}
 	
 	// Update is called once per frame
 	void Update () {
+
+        if (!bitMode)
+        {
+            time -= Time.deltaTime;
+            timeText.text = "TIME:" + time.ToString("0.0");
+            if(time <= 0)
+            {
+                SceneManager.LoadScene("GameOver");
+            }
+        }
+
+
         delta += Time.deltaTime;
         if(delta >= span)//一定時間たつと
         {
@@ -68,4 +86,16 @@ public class GameController : MonoBehaviour {
             }
         }
 	}
+
+    public void SetBitMode(bool start)
+    {
+        if (start)
+        {
+            bitMode = true;
+        }
+        else
+        {
+            bitMode = false;
+        }
+    }
 }

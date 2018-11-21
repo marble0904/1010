@@ -12,18 +12,25 @@ public class NumberController : MonoBehaviour {
     public Text nowNumberText;
     public Text nextNumberText;
 
+    bool[,] zeroFlag = new bool[4, 4];//ゼロになったか
+
     public ScoreController sc;
     public EffectController ec;
+    public GameController gc;
+
+    bool bitMode = false;
+
+    public Text bitTimeText;
+    float bitTime = 0;
 
 	// Use this for initialization
 	void Start () {
-        //nowNumberText = GameObject.Find("/Canvas/now").GetComponent<Text>();
-        //nextNumberText = GameObject.Find("/Canvas/next").GetComponent<Text>();
         nowNumber = Random.Range(1, 10);
         nextNumber = Random.Range(1, 10);
         nowNumberText.text = nowNumber.ToString();
         nextNumberText.text = nextNumber.ToString();
-        
+
+        bitTimeText.text = "";
 
         //テキストを配列に入れる
         for(int i = 0; i < 4; i++)
@@ -40,19 +47,50 @@ public class NumberController : MonoBehaviour {
         {
             for(int j = 0; j < 4; j++)//列
             {
-                intValues[i, j] = Random.Range(0, 10);
+                intValues[i, j] = Random.Range(1, 10);//1~9の値を入れる
+                numberText[i, j].text = intValues[i, j].ToString();
             }
         }
-	}
+
+        //フラグを初期化
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                zeroFlag[i, j] = false;
+            }
+        }
+
+
+    }
 	
 	// Update is called once per frame
 	void Update () {
-		for(int i = 0; i < 4; i++)
+
+        if (bitMode)
         {
-            for(int j = 0; j < 4; j++)
+            if(bitTime <= 0)
             {
-                numberText[i, j].text = intValues[i, j].ToString();
+                ResetBitMode();
             }
+            else
+            {
+                bitTime -= Time.deltaTime;
+                bitTimeText.text = "BITTIME:" + bitTime.ToString("0.0");
+            }
+
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("number=["+ intValues[0,0] + intValues[0,1] + intValues[0,2] + intValues[0,3]+
+                      ";" + intValues[1,0] + intValues[1,1] + intValues[1,2] + intValues[1,3]+
+                      ";" + intValues[2,0] + intValues[2,1] + intValues[2,2] + intValues[2,3]+
+                      ";" + intValues[3,0] + intValues[3,1] + intValues[3,2] + intValues[3,3] + "]");
+            Debug.Log("flag =[" + zeroFlag[0,0] + zeroFlag[0,1] + zeroFlag[0,2] + zeroFlag[0,3] +
+                       ";" +zeroFlag[1, 0] + zeroFlag[1, 1] + zeroFlag[1, 2] + zeroFlag[1, 3] +
+                       ";" + zeroFlag[2, 0] + zeroFlag[2, 1] + zeroFlag[2, 2] + zeroFlag[2, 3] +
+                       ";" + zeroFlag[3, 0] + zeroFlag[3, 1] + zeroFlag[3, 2] + zeroFlag[3, 3] + "]");
         }
 	}
 
@@ -82,16 +120,22 @@ public class NumberController : MonoBehaviour {
                 Calculate(2, true);
                 break;
             case ";":
-                //Debug.Log("InputKey.;");
                 Calculate(3, true);
                 break;
             default:
                 break;
         }
         //現在の数を更新
-        nowNumber = nextNumber;
+        if (!bitMode)
+        {
+            nowNumber = nextNumber;
+            nextNumber = Random.Range(1, 10);
+        }else
+        {
+            nowNumber = 1;
+            nextNumber = 1;
+        }
         nowNumberText.text = nowNumber.ToString();
-        nextNumber = Random.Range(1, 10);
         nextNumberText.text = nextNumber.ToString();
     }
 
@@ -100,137 +144,275 @@ public class NumberController : MonoBehaviour {
     //row:行であればtrue
     void Calculate(int num,bool row)
     {
-        if (row)
+        if (!bitMode)
         {
-            for (int i = 0; i < 4; i++)
+            if (row)//行のとき
             {
-                intValues[num, i] = (intValues[num,i] + nowNumber)%10;//現在と足す値の合計を10で割った値
-                if(intValues[num,i] == 0)//0になったらスコアを加算
-                {
-                    sc.AddScore(100);
-                    ec.ZeroEffect(num, i);
-                    //ゼロの連鎖
-                    Chain(num, i,true);
-                    ec.ZeroChain(i, false);
-                }
 
-                if ((i == 0 || i == 2)&& intValues[num, i] == 1)//c0が1のとき
+                for (int i = 0; i < 4; i++)
                 {
-                    if (BitCheck(num))
+                    if (!zeroFlag[num, i])//0ではないマスの場合
                     {
-                        Debug.Log("BitMode");
-                    }
-                    else
-                    {
-                        Debug.Log("NotBitMode");
-                    }
-                }else if ((i == 1 || i ==3) && intValues[num, i] == 0)
-                {
-                    if (BitCheck(num))
-                    {
-                        Debug.Log("BitMode");
-                    }
-                    else
-                    {
-                        Debug.Log("NotBitMode");
+                        SetValue(num, i, false);
+                        if(intValues[num,i] == 0)
+                        {
+                            Chain(num, i, true);
+                        }
                     }
                 }
+            }
+            else//列のとき
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    if (!zeroFlag[i, num])//ゼロではない場合
+                    {
+                        SetValue(i, num, false);//マスの値を計算
+                        if(intValues[i,num] == 0)
+                        {
+                            Chain(i, num, false);//連鎖処理
+                        }
+                    }
 
-                numberText[num, i].text = intValues[num, i].ToString();//テキストを更新
-
+                }
             }
         }
-        else
+        else//ビットモードのとき
         {
-            for (int i = 0; i < 4; i++)
+            if (row)//行のとき
             {
-                intValues[i, num] = (intValues[i, num] + nowNumber) % 10;//現在と足す値の合計を10で割った値
-
-                if (intValues[i, num] == 0)//0になったらスコアを加算
+                for(int i=0;i<4;i++)
                 {
-                    sc.AddScore(100);
-                    ec.ZeroEffect(i,num);
-                    Chain(i, num, false);
-                    ec.ZeroChain(i,true);
-                }
-
-                if((num == 0 || num == 2)&& intValues[i,num] == 1)//c0が1のとき
-                {
-                    if (BitCheck(i))
+                    if(!zeroFlag[num,i])//0ではないとき
                     {
-                        Debug.Log("BitMode");
-                    }
-                    else
-                    {
-                        Debug.Log("NotBitMode");
-                    }
-                }else if ((num == 1 || num ==3) && intValues[i,num] == 0)
-                {
-                    if (BitCheck(i))
-                    {
-                        Debug.Log("BitMode");
-                    }
-                    else
-                    {
-                        Debug.Log("NotBitMode");
+                        SetValue(num, i, true);
+                        Chain(num, i, true);
                     }
                 }
 
-                numberText[i, num].text = intValues[i,num].ToString();//テキストを更新
-
+            }
+            else//列のとき
+            {
+                for(int i = 0; i < 4; i++)
+                {
+                    if (!zeroFlag[i, num])//0ではないとき
+                    {
+                        SetValue(i,num,true);
+                        Chain(i, num, false);
+                    }
+                }
             }
         }
 
     }
 
-    bool BitCheck(int r)
+    bool BitCheck()
     {
-        if (intValues[r,1] == 0)
+        for(int i = 0; i < 4; i++)
         {
-            if(intValues[r,2] == 1)
+            for(int j = 0; j < 4; j++)
             {
-                if(intValues[r,3] == 0)
+                if (!zeroFlag[i,j])
                 {
-                    return true;
+                    return false;
                 }
             }
         }
-        return false;
+        if (bitMode)
+        {
+            bitTime+= 1.0f;
+        }
+        ec.BitEffect();
+        return true;
     }
 
     void Chain(int r,int c,bool row)//列で連鎖
     {
-        if (row) {
-            for (int i = 0; i < 4; i++)
-            {
-                if (i != r)
-                {
-                    intValues[i, c] = (intValues[i, c] + 1) % 10;
-                    if (intValues[i, c] == 0)
-                    {
-                        ec.ZeroEffect(i, c);
-                        sc.AddScore(100);
-                    }
-                }
-            }
-
-
+        if (row)//連鎖エフェクト
+        {
+            ec.ZeroChain(c,false);
         }
         else
         {
-            for (int i = 0; i < 4; i++)
+            ec.ZeroChain(r, true);
+        }
+
+        if (!bitMode)//通常モードのとき
+        {
+            if (row)//行のとき
             {
-                if (i != c)
+                for (int i = 0; i < 4; i++)
                 {
-                    intValues[r, i] = (intValues[r, i] + 1) % 10;
-                    if (intValues[r, i] == 0)
+                    if (i != r)
                     {
-                        ec.ZeroEffect(r, i);
-                        sc.AddScore(100);
+                        if (!zeroFlag[i, c])//ゼロではない場合
+                        {
+                            SetValue(i, c, false);
+                        }
+                    }
+                }
+            }
+            else//列のとき
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    if (i != c)
+                    {
+                        if (!zeroFlag[r, i])//ゼロではない場合
+                        {
+                            SetValue(r, i,false);
+                        }
+                    }
+                }
+            }
+        }
+        else//bitModeのとき
+        {
+            if (row)//行のとき
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    if (i != r)
+                    {
+                        if (!zeroFlag[i, c])//ゼロではない場合
+                        {
+                            SetValue(i, c, true);
+                        }
+                    }
+                }
+            }
+            else//列のとき
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    if (i != c)
+                    {
+                        if (!zeroFlag[r, i])//ゼロではない場合
+                        {
+                            SetValue(r, i, true);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    void Zero(int r,int c)
+    {
+        zeroFlag[r, c] = true;//フラグを立てる
+        ec.ZeroEffect(r, c);//ゼロになった時のエフェクトを出す
+        sc.AddScore(100);//スコアを加算
+        if (BitCheck())
+        {
+            SetBitMode();
+            Debug.Log("BitMode");
+        }
+        else
+        {
+            Debug.Log("NotBitMode");
+        }
+    }
+
+    void SetBitMode()
+    {
+        if (!bitMode)
+        {
+            bitTime = 10f;
+            bitTimeText.text = "BITTIME:" + bitTime.ToString("0.0");
+
+            bitMode = true;
+            gc.SetBitMode(true);
+            nowNumber = 1;
+            nextNumber = 1;
+            nowNumberText.text = nowNumber.ToString();
+            nextNumberText.text = nextNumber.ToString();
+            //ランダムに初期値を代入
+            for (int i = 0; i < 4; i++)//行
+            {
+                for (int j = 0; j < 4; j++)//列
+                {
+                    intValues[i, j] = Random.Range(0, 2);//0,1の値を入れる 
+                    numberText[i, j].text = intValues[i, j].ToString();
+                    if (intValues[i, j] == 1)
+                    {
+                        zeroFlag[i, j] = false; //1であればフラグを外す
+                    }
+                }
+            }
+            Debug.Log("number=[" + intValues[0, 0] + intValues[0, 1] + intValues[0, 2] + intValues[0, 3] +
+";" + intValues[1, 0] + intValues[1, 1] + intValues[1, 2] + intValues[1, 3] +
+";" + intValues[2, 0] + intValues[2, 1] + intValues[2, 2] + intValues[2, 3] +
+";" + intValues[3, 0] + intValues[3, 1] + intValues[3, 2] + intValues[3, 3] + "]");
+        }
+        else
+        {
+            //ランダムに初期値を代入
+            for (int i = 0; i < 4; i++)//行
+            {
+                for (int j = 0; j < 4; j++)//列
+                {
+                    intValues[i, j] = Random.Range(0, 2);//0,1の値を入れる 
+                    numberText[i, j].text = intValues[i, j].ToString();
+                    if (intValues[i, j] == 1)
+                    {
+                        zeroFlag[i, j] = false; //1であればフラグを外す
                     }
                 }
             }
         }
 
+
+    }
+
+    void ResetBitMode()
+    {
+        bitMode = false;
+        gc.SetBitMode(false);
+
+        nowNumber = Random.Range(1, 10);
+        nextNumber = Random.Range(1, 10);
+        nowNumberText.text = nowNumber.ToString();
+        nextNumberText.text = nextNumber.ToString();
+
+        bitTimeText.text = "";
+
+        //ランダムに初期値を代入
+        for (int i = 0; i < 4; i++)//行
+        {
+            for (int j = 0; j < 4; j++)//列
+            {
+                intValues[i, j] = Random.Range(1, 10);//1~9の値を入れる
+                numberText[i, j].text = intValues[i, j].ToString();
+            }
+        }
+
+        //フラグを初期化
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                zeroFlag[i, j] = false;
+            }
+        }
+
+    }
+
+    void SetValue(int r,int c,bool bit)
+    {
+        if (!bit)
+        {
+            intValues[r, c] = (intValues[r, c] + nowNumber) % 10;//加算する値との和の下一桁
+            if(intValues[r,c] == 0)//計算後に0になったとき
+            {
+                Zero(r, c);
+            }
+        }
+        else
+        {
+            intValues[r, c] = 0;
+            Zero(r, c);
+        }
+
+        numberText[r, c].text = intValues[r, c].ToString();//値を更新
     }
 }

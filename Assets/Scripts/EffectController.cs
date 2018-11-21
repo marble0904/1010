@@ -12,6 +12,8 @@ public class EffectController : MonoBehaviour {
     public ParticleSystem[] zeroChainR = new ParticleSystem[4];//0の連鎖エフェクト行
     public ParticleSystem[] zeroChainC = new ParticleSystem[4];//0の連鎖エフェクト列
 
+    public ParticleSystem bitEffect;
+
 	// Use this for initialization
 	void Start () {
         for (int i=0;i<4;i++)
@@ -55,5 +57,10 @@ public class EffectController : MonoBehaviour {
         {
             zeroChainC[num].Emit(1);
         }
+    }
+
+    public void BitEffect()
+    {
+        bitEffect.Emit(30);
     }
 }
