@@ -10,7 +10,7 @@ public class ScoreController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		
+        score = 0;
 	}
 	
 	// Update is called once per frame
@@ -24,7 +24,7 @@ public class ScoreController : MonoBehaviour {
         ScoreText.text = "SCORE:" + score;
     }
 
-    public int GetScore()
+    public static int GetScore()
     {
         return score;
     }

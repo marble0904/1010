@@ -23,8 +23,12 @@ public class NumberController : MonoBehaviour {
     public Text bitTimeText;
     float bitTime = 0;
 
+    public FontController fc;
+
 	// Use this for initialization
 	void Start () {
+        
+
         nowNumber = Random.Range(1, 10);
         nextNumber = Random.Range(1, 10);
         nowNumberText.text = nowNumber.ToString();
@@ -317,6 +321,8 @@ public class NumberController : MonoBehaviour {
     {
         if (!bitMode)
         {
+            fc.SetFont(true);
+            gc.ResetZeroCount();
             bitTime = 10f;
             bitTimeText.text = "BITTIME:" + bitTime.ToString("0.0");
 
@@ -366,9 +372,10 @@ public class NumberController : MonoBehaviour {
 
     void ResetBitMode()
     {
+        
         bitMode = false;
         gc.SetBitMode(false);
-
+        fc.SetFont(false);
         nowNumber = Random.Range(1, 10);
         nextNumber = Random.Range(1, 10);
         nowNumberText.text = nowNumber.ToString();
@@ -405,6 +412,7 @@ public class NumberController : MonoBehaviour {
             if(intValues[r,c] == 0)//計算後に0になったとき
             {
                 Zero(r, c);
+                gc.ZeroCount();
             }
         }
         else
@@ -415,4 +423,5 @@ public class NumberController : MonoBehaviour {
 
         numberText[r, c].text = intValues[r, c].ToString();//値を更新
     }
+
 }

@@ -15,6 +15,8 @@ public class GameController : MonoBehaviour {
     public Text timeText;
     bool bitMode;
 
+    int zeroCount = 0;
+
 	// Use this for initialization
 	void Start () {
         time = 60f;
@@ -97,5 +99,29 @@ public class GameController : MonoBehaviour {
         {
             bitMode = false;
         }
+    }
+
+    public void ZeroCount()
+    {
+        zeroCount++;
+        if (zeroCount == 6)
+        {
+            SetSpan(0.5f);
+        }
+        else if (zeroCount == 14)
+        {
+            SetSpan(0.3f);
+        }
+    }
+
+    public void SetSpan(float span)
+    {
+        this.span = span;
+    }
+
+    public void ResetZeroCount()
+    {
+        zeroCount = 0;
+        SetSpan(1.0f);
     }
 }
