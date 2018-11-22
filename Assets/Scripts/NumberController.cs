@@ -158,10 +158,18 @@ public class NumberController : MonoBehaviour {
                     if (!zeroFlag[num, i])//0ではないマスの場合
                     {
                         SetValue(num, i, false);
+                        if (bitMode)
+                        {
+                            break;
+                        }
                         if(intValues[num,i] == 0)
                         {
                             Chain(num, i, true);
                         }
+                    }
+                    if (bitMode)
+                    {
+                        break;
                     }
                 }
             }
@@ -172,12 +180,19 @@ public class NumberController : MonoBehaviour {
                     if (!zeroFlag[i, num])//ゼロではない場合
                     {
                         SetValue(i, num, false);//マスの値を計算
+                        if(bitMode)
+                        {
+                            break;
+                        }
                         if(intValues[i,num] == 0)
                         {
                             Chain(i, num, false);//連鎖処理
                         }
                     }
-
+                    if (bitMode)
+                    {
+                        break;
+                    }
                 }
             }
         }
