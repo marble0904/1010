@@ -77063,7 +77063,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bgmSource: {fileID: 1696521321}
-  bgm0: {fileID: 8300000, guid: 3919e2813f905b1449512cd183dd10b6, type: 3}
+  bgm0: {fileID: 8300000, guid: f6bbd82d753ec24489613254515d5e7c, type: 3}
   bgm1: {fileID: 8300000, guid: 266fd6a7d72906145918b575b239d054, type: 3}
   line: {fileID: 1676871343}
   zeroLine: {fileID: 1468874239}
@@ -135722,11 +135722,11 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 3919e2813f905b1449512cd183dd10b6, type: 3}
+  m_audioClip: {fileID: 8300000, guid: f6bbd82d753ec24489613254515d5e7c, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0

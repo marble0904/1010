@@ -286,7 +286,12 @@ public class NumberController : MonoBehaviour {
                     {
                         if (!zeroFlag[i, c])//ゼロではない場合
                         {
-                            SetValue(i, c, false);
+                            intValues[i, c] = (intValues[i, c] + 1) % 10;
+                            numberText[i, c].text = intValues[i, c].ToString();
+                            if (intValues[i,c] == 0)
+                            {
+                                Zero(i, c);
+                            }
                         }
                     }
                 }
@@ -299,7 +304,12 @@ public class NumberController : MonoBehaviour {
                     {
                         if (!zeroFlag[r, i])//ゼロではない場合
                         {
-                            SetValue(r, i,false);
+                            intValues[r, i] = (intValues[r, i] + 1) % 10;
+                            numberText[r, i].text = intValues[r, i].ToString();
+                            if (intValues[r, i] == 0)
+                            {
+                                Zero(r,i);
+                            }
                         }
                     }
                 }

@@ -10,6 +10,7 @@ public class GameOverController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        naichilab.RankingLoader.Instance.SendScoreAndShowRanking(ScoreController.GetScore());
         score.text = "SCORE:" + ScoreController.GetScore().ToString();
 	}
 	
