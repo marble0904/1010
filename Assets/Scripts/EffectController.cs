@@ -14,6 +14,8 @@ public class EffectController : MonoBehaviour {
 
     public ParticleSystem bitEffect;
 
+    public SoundController sc;
+
 	// Use this for initialization
 	void Start () {
         for (int i=0;i<4;i++)
@@ -30,25 +32,42 @@ public class EffectController : MonoBehaviour {
 		
 	}
 
-    public void LineEffect(int num,bool row)
+    public void LineEffect(int num, bool row, float waitTime)
     {
+        sc.Line();
+
+        float speed;
         if (row)
         {
+            speed = (1.0f - waitTime) * 50f;
+        }
+        else
+        {
+            speed = (1.0f - waitTime) * 30f;
+        }
+
+        if (row)
+        {
+            lineR[num].startSpeed = speed;
             lineR[num].Emit(1);
         }
         else
         {
+            lineC[num].startSpeed = speed;
             lineC[num].Emit(1);
         }
     }
 
     public void ZeroEffect(int r,int c)
     {
+        sc.Zero();
         zero[r, c].Emit(10);
     }
 
     public void ZeroChain(int num,bool row)
     {
+        sc.ZeroLine();
+
         if (row)
         {
             zeroChainR[num].Emit(1);
@@ -57,10 +76,12 @@ public class EffectController : MonoBehaviour {
         {
             zeroChainC[num].Emit(1);
         }
+
     }
 
     public void BitEffect()
     {
+        sc.BitMode();
         bitEffect.Emit(30);
     }
 }

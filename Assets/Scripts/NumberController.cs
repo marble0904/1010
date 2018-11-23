@@ -25,9 +25,11 @@ public class NumberController : MonoBehaviour {
 
     public FontController fc;
 
+    int zeroCount;
+
 	// Use this for initialization
 	void Start () {
-        
+        zeroCount = 0;
 
         nowNumber = Random.Range(1, 10);
         nextNumber = Random.Range(1, 10);
@@ -98,56 +100,50 @@ public class NumberController : MonoBehaviour {
         }
 	}
 
-    public void InputKey(string key)
+    public void InputKey(string key, float waitTime)
     {
         switch (key)//キーに対応した計算を行う
         {
             case "A":
-                Calculate(0,false);
+                Calculate(waitTime,0,false);
                 break;
             case "S":
-                Calculate(1, false);
+                Calculate(waitTime,1, false);
                 break;
             case "D":
-                Calculate(2, false);
+                Calculate(waitTime,2, false);
                 break;
             case "F":
-                Calculate(3, false);
+                Calculate(waitTime,3, false);
                 break;
             case "J":
-                Calculate(0, true);
+                Calculate(waitTime,0, true);
                 break;
             case "K":
-                Calculate(1, true);
+                Calculate(waitTime,1, true);
                 break;
             case "L":
-                Calculate(2, true);
+                Calculate(waitTime,2, true);
                 break;
             case ";":
-                Calculate(3, true);
+                Calculate(waitTime,3, true);
                 break;
             default:
                 break;
         }
-        //現在の数を更新
-        if (!bitMode)
-        {
-            nowNumber = nextNumber;
-            nextNumber = Random.Range(1, 10);
-        }else
-        {
-            nowNumber = 1;
-            nextNumber = 1;
-        }
-        nowNumberText.text = nowNumber.ToString();
-        nextNumberText.text = nextNumber.ToString();
     }
 
     //対応した行または列に値を足す
     //num:行または列の番号
     //row:行であればtrue
-    void Calculate(int num,bool row)
+    void Calculate(float waitTime, int num,bool row)
     {
+        StartCoroutine(DelayCalculate(waitTime,num,row));
+    }
+
+    IEnumerator DelayCalculate(float waitTime, int num, bool row)
+    {
+        yield return new WaitForSeconds(waitTime);
         if (!bitMode)
         {
             if (row)//行のとき
@@ -162,9 +158,9 @@ public class NumberController : MonoBehaviour {
                         {
                             break;
                         }
-                        if(intValues[num,i] == 0)
+                        if (intValues[num, i] == 0)
                         {
-                            Chain(num, i, true);
+                            StartCoroutine(Chain(num, i, true));
                         }
                     }
                     if (bitMode)
@@ -180,13 +176,13 @@ public class NumberController : MonoBehaviour {
                     if (!zeroFlag[i, num])//ゼロではない場合
                     {
                         SetValue(i, num, false);//マスの値を計算
-                        if(bitMode)
+                        if (bitMode)
                         {
                             break;
                         }
-                        if(intValues[i,num] == 0)
+                        if (intValues[i, num] == 0)
                         {
-                            Chain(i, num, false);//連鎖処理
+                            StartCoroutine(Chain(i, num, false));//連鎖処理
                         }
                     }
                     if (bitMode)
@@ -200,42 +196,50 @@ public class NumberController : MonoBehaviour {
         {
             if (row)//行のとき
             {
-                for(int i=0;i<4;i++)
+                for (int i = 0; i < 4; i++)
                 {
-                    if(!zeroFlag[num,i])//0ではないとき
+                    if (!zeroFlag[num, i])//0ではないとき
                     {
                         SetValue(num, i, true);
-                        Chain(num, i, true);
+                        StartCoroutine(Chain(num, i, true));
                     }
                 }
 
             }
             else//列のとき
             {
-                for(int i = 0; i < 4; i++)
+                for (int i = 0; i < 4; i++)
                 {
                     if (!zeroFlag[i, num])//0ではないとき
                     {
-                        SetValue(i,num,true);
-                        Chain(i, num, false);
+                        SetValue(i, num, true);
+                        StartCoroutine(Chain(i, num, false));
                     }
                 }
             }
         }
 
+        //現在の数を更新
+        if (!bitMode)
+        {
+            nowNumber = nextNumber;
+            nextNumber = Random.Range(1, 10);
+        }
+        else
+        {
+            nowNumber = 1;
+            nextNumber = 1;
+        }
+        nowNumberText.text = nowNumber.ToString();
+        nextNumberText.text = nextNumber.ToString();
+
     }
 
     bool BitCheck()
     {
-        for(int i = 0; i < 4; i++)
+        if(zeroCount != 16)
         {
-            for(int j = 0; j < 4; j++)
-            {
-                if (!zeroFlag[i,j])
-                {
-                    return false;
-                }
-            }
+            return false;
         }
         if (bitMode)
         {
@@ -245,8 +249,24 @@ public class NumberController : MonoBehaviour {
         return true;
     }
 
-    void Chain(int r,int c,bool row)//列で連鎖
+    IEnumerator Chain(int r,int c,bool row)//列で連鎖
     {
+        float waitTime;
+        float span = gc.GetSpan();
+        if (span >= 1.0f)
+        {
+            waitTime = 0.5f;
+        }
+        else if(span >= 0.5f)
+        {
+            waitTime = 0.25f;
+        }
+        else
+        {
+            waitTime = 0.15f;
+        }
+        yield return new WaitForSeconds(waitTime);
+
         if (row)//連鎖エフェクト
         {
             ec.ZeroChain(c,false);
@@ -319,11 +339,12 @@ public class NumberController : MonoBehaviour {
     void Zero(int r,int c)
     {
         zeroFlag[r, c] = true;//フラグを立てる
+        zeroCount++;//ゼロを増やす
         ec.ZeroEffect(r, c);//ゼロになった時のエフェクトを出す
         sc.AddScore(100);//スコアを加算
         if (BitCheck())
         {
-            SetBitMode();
+            StartCoroutine(SetBitMode());
             Debug.Log("BitMode");
         }
         else
@@ -332,11 +353,16 @@ public class NumberController : MonoBehaviour {
         }
     }
 
-    void SetBitMode()
+    //ビットモードにする
+    IEnumerator SetBitMode()
     {
+        yield return new WaitForSeconds(0.6f);
+        sc.AddScore(1000);//1000点加算
+        zeroCount = 0;
+
         if (!bitMode)
         {
-            fc.SetFont(true);
+            fc.SetFont(true);//bitフォントにする
             gc.ResetZeroCount();
             bitTime = 10f;
             bitTimeText.text = "BITTIME:" + bitTime.ToString("0.0");
@@ -358,6 +384,10 @@ public class NumberController : MonoBehaviour {
                     {
                         zeroFlag[i, j] = false; //1であればフラグを外す
                     }
+                    else
+                    {
+                        zeroCount++;//0であればゼロカウントを増やす
+                    }
                 }
             }
             Debug.Log("number=[" + intValues[0, 0] + intValues[0, 1] + intValues[0, 2] + intValues[0, 3] +
@@ -378,6 +408,10 @@ public class NumberController : MonoBehaviour {
                     {
                         zeroFlag[i, j] = false; //1であればフラグを外す
                     }
+                    else
+                    {
+                        zeroCount++;//0ならゼロカウントを増やす
+                    }
                 }
             }
         }
@@ -385,12 +419,14 @@ public class NumberController : MonoBehaviour {
 
     }
 
+    //通常モードにする
     void ResetBitMode()
     {
         
-        bitMode = false;
-        gc.SetBitMode(false);
-        fc.SetFont(false);
+        bitMode = false;//フラグを下す
+        zeroCount = 0;
+        gc.SetBitMode(false);//gameControllerに反映
+        fc.SetFont(false);//通常フォントにする
         nowNumber = Random.Range(1, 10);
         nextNumber = Random.Range(1, 10);
         nowNumberText.text = nowNumber.ToString();
@@ -419,6 +455,7 @@ public class NumberController : MonoBehaviour {
 
     }
 
+    //対象のマスの計算を行い、テキストを更新する
     void SetValue(int r,int c,bool bit)
     {
         if (!bit)
