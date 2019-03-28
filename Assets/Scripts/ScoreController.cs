@@ -6,11 +6,11 @@ using UnityEngine.UI;
 public class ScoreController : MonoBehaviour {
 
     public Text ScoreText;
-    int score = 0;
+    static int score = 0;
 
 	// Use this for initialization
 	void Start () {
-		
+        score = 0;
 	}
 	
 	// Update is called once per frame
@@ -20,7 +20,12 @@ public class ScoreController : MonoBehaviour {
 
     public void AddScore(int point)
     {
-        this.score += point;
-        ScoreText.text = "SCORE:" + this.score;
+        score += point;
+        ScoreText.text = "SCORE:" + score;
+    }
+
+    public static int GetScore()
+    {
+        return score;
     }
 }
