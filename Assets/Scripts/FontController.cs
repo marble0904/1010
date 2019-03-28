@@ -44,12 +44,14 @@ public class FontController : MonoBehaviour {
             font = font1;
             nowText.fontSize = 20;
             nextText.fontSize = 20;
+            timeText.fontSize = 30;
         }
         else
         {
             font = font2;
             nowText.fontSize = 50;
             nextText.fontSize = 50;
+            timeText.fontSize = 50;
         }
 
         for(int i = 0; i < 4; i++)

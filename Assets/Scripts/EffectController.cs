@@ -37,23 +37,19 @@ public class EffectController : MonoBehaviour {
         sc.Line();
 
         float speed;
-        if (row)
-        {
-            speed = (1.0f - waitTime) * 50f;
-        }
-        else
-        {
-            speed = (1.0f - waitTime) * 30f;
-        }
 
         if (row)
         {
+            speed = (1.0f - waitTime) * 80f;
             lineR[num].startSpeed = speed;
+            lineR[num].startLifetime = waitTime * 2f;
             lineR[num].Emit(1);
         }
         else
         {
+            speed = (1.0f - waitTime) * 80f;
             lineC[num].startSpeed = speed;
+            lineR[num].startLifetime = waitTime * 0.7f;
             lineC[num].Emit(1);
         }
     }

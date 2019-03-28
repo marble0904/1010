@@ -19,26 +19,41 @@ public class GameController : MonoBehaviour {
     int zeroCount = 0;
     float waitTime;
 
+    static bool scoreAttack = true;//スコアアタックかどうか
 
 
 	// Use this for initialization
 	void Start () {
-        time = 60f;
+        if (scoreAttack)
+        {
+            time = 60f;
+        }
+        else
+        {
+            time = 0;
+            timeText.text = "TIME:" + time.ToString("--");
+        }
 	}
 	
 	// Update is called once per frame
 	void Update () {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            SceneManager.LoadScene("MainMenu");
+        }
 
         waitTime = span / 2.0f;
 
-
-        if (!bitMode)
+        if (scoreAttack)
         {
-            time -= Time.deltaTime;
-            timeText.text = "TIME:" + time.ToString("0.0");
-            if(time <= 0)
+            if (!bitMode)
             {
-                SceneManager.LoadScene("GameOver");
+                time -= Time.deltaTime;
+                timeText.text = "TIME:" + time.ToString("0.0");
+                if (time <= 0)
+                {
+                    SceneManager.LoadScene("GameOver");
+                }
             }
         }
 
@@ -100,6 +115,11 @@ public class GameController : MonoBehaviour {
     {
         if (start)
         {
+            if (scoreAttack)
+            {
+                time += 20.0f;
+                timeText.text = "TIME:" + time.ToString("0.0");
+            }
             bitMode = true;
             sc.SetBGM1();
         }
@@ -137,5 +157,11 @@ public class GameController : MonoBehaviour {
     public float GetSpan()
     {
         return span;
+    }
+
+
+    public static void SetGameMode(bool gameMode)
+    {
+        scoreAttack = gameMode;
     }
 }
